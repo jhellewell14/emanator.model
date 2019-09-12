@@ -1,0 +1,20 @@
+Package: emanator.model
+Type: Package
+Title: Code accompanying the manuscript " "
+Version: 0.1.0
+Authors@R: 
+   person(given = "Joel",
+          family = "Hellewell",
+          role = c("aut","cre"),
+          email = "lshjh2@lshtm.ac.uk")
+Description: Code to generate figures in the manuscript
+Depends:
+   dplyr,
+   magrittr,
+   ggplot2,
+   hanojoel,
+   hrbrthemes,
+   cowplot
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
