@@ -1,8 +1,14 @@
-
+#' Model run
+#' This function performs model runs with specified parameters. Some default parameters are specified to save repeating code. Some must
+#' be specified each time to guarantee that parameter values aren't incorrectly passed.
+#' @importFrom ICDMM create_r_model
+#' @return A list of all of the different outputs from the model
+#' @author Joel Hellewell
+#' @keywords internal
 mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
                r_EM0=0.6053263,em_loss=0.001954954,d_EM0=0,
                surv_bioassay=0,init_EIR,...){
-  wh <- hanojoel:::create_r_model(odin_model_path = system.file("extdata/old_models/odin_model_emanators.R",package = "hanojoel"),
+  wh <- ICDMM:::create_r_model(odin_model_path = system.file("extdata/old_models/odin_model_emanators.R",package = "hanojoel"),
                                   het_brackets = 5,
                                   age = c(0,0.25,0.5,0.75,1,1.25,1.5,1.75,2,3.5,5,7.5,10,15,20,30,40,50,60,70,80),
                                   num_int = 4,
@@ -30,6 +36,12 @@ mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
   out <- mod$transform_variables(mod_run)
 }
 
+#' Find EIR boundaries
+#' This function finds the maximum pre-intervention EIR at which elimination can still occur for ITN or ITN+EM interventions. It systematically
+#' searches until it has found the EIR to 3 decimal places.
+#' @return The minimum EIR value
+#' @author Joel Hellewell
+#' @keywords internal
 find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
                               em_cov,itn_cov){
@@ -61,6 +73,10 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
   return(EIR_min)
 }
 
+#' Finds the EIR boundary systematically for a given step size
+#' @author Joel Hellewell
+#' @return Minimum EIR value
+#' @keywords internal
 find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
                               em_cov,itn_cov){
@@ -88,6 +104,9 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
   return(round(EIR_min,3)) # return minimum (rounded to get rid of 0.0001 if you started at 0)
 }
 
+#' Performs model runs for two EIR values and returns whether they achieve elimination
+#' @author Joel Hellewell
+#' @keywords internal
 compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                          bites_Emanator,bites_Indoors,bites_Bed,
                          em_cov,itn_cov){
@@ -112,6 +131,10 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
   return(list(min=elim(run_min),max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
 }
 
+#' Returns whether a run has achieved elimination
+#' @author Joel Hellewell
+#' @return TRUE or FALSE depending on whether elimination is achieved
+#' @keywords internal
 elim <- function(mod_run){
   out <- FALSE
   for(j in 1:3234){
