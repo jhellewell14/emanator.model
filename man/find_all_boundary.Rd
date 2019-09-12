@@ -7,7 +7,7 @@ This function finds the maximum pre-intervention EIR at which elimination can st
 searches until it has found the EIR to 3 decimal places.}
 \usage{
 find_all_boundary(r_EM0, em_loss, surv_bioassay, bites_Emanator,
-  bites_Indoors, bites_Bed, em_cov, itn_cov)
+  bites_Indoors, bites_Bed, em_cov, itn_cov, Q0)
 }
 \value{
 The minimum EIR value

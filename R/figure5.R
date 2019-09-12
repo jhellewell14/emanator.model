@@ -85,6 +85,16 @@ figure5a <- function(){
  return(p)
 }
 
+#' Plot Figure 5b
+#'
+#' This performs 330 model runs in total, it will take some time.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab scale_x_continuous
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom viridis scale_fill_viridis
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @return plot
+#' @author Joel Hellewell
+#' @export
 figure5b <- function(){
 
  dm <- matrix(0,ncol=11,nrow=30)
@@ -122,5 +132,119 @@ figure5b <- function(){
   scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
                      breaks=seq(0,180,30)) + theme_minimal() +
   theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
+ return(p)
+}
+
+#' Plot Figure 5c
+#'
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of outdoor exposure.
+#' @importFrom wesanderson wes_palette
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
+#' @return plot
+#' @author Joel Hellewell
+#' @export
+figure5c <- function(){
+
+ ITN_elim <- c()
+ ITN_EM_elim <- c()
+ itn_cov <- 0.8
+
+ for(i in 1:5){ #10% -> 50% outdoor biting exposure
+  print(paste("Outdoor exposure = ",i*0.1))
+  bites_Emanator <- i*0.1
+  bites_Indoors <- 1 - bites_Emanator
+  bites_Bed <- 0.8813754*bites_Indoors
+  em_cov <- 0
+  # ITN elimination
+  print("ITN")
+  ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                   surv_bioassay=0,
+                                   bites_Emanator,bites_Indoors,bites_Bed,
+                                   em_cov,itn_cov,Q0=0.16)
+
+  # ITM + EM
+  em_cov <- 0.8
+  print("ITN + EM")
+  ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                      surv_bioassay=0,
+                                      bites_Emanator,bites_Indoors,bites_Bed,
+                                      em_cov,itn_cov,Q0=0.16)
+ }
+
+ hi <- wes_palette(n=3,name="FantasticFox1")
+
+ p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+  ggplot() + coord_cartesian(ylim=c(0,4)) +
+  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+  geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
+  geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+  scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
+  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+  xlab("Proportion of bites during the evening coverage gap") +
+  ylab("EIR (bites per year)")
+
+ return(p)
+}
+
+#' Plot Figure 5d
+#'
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of outdoor exposure.
+#' @importFrom wesanderson wes_palette
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
+#' @return plot
+#' @author Joel Hellewell
+#' @export
+figure5d <- function(){
+
+ ITN_elim <- c()
+ ITN_EM_elim <- c()
+ itn_cov <- 0.8
+
+ for(i in 1:5){ #10% -> 50% outdoor biting exposure
+  print(paste("Outdoor exposure = ",i*0.1))
+  bites_Emanator <- i*0.1
+  bites_Indoors <- 1 - bites_Emanator
+  bites_Bed <- 0.8813754*bites_Indoors
+  em_cov <- 0
+  # ITN elimination
+  print("ITN")
+  ITN_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                   surv_bioassay=0,
+                                   bites_Emanator,bites_Indoors,bites_Bed,
+                                   em_cov,itn_cov,Q0=0.16)
+
+  # ITM + EM
+  em_cov <- 0.8
+  print("ITN + EM")
+  ITN_EM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                      surv_bioassay=0,
+                                      bites_Emanator,bites_Indoors,bites_Bed,
+                                      em_cov,itn_cov,Q0=0.16)
+ }
+
+ hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
+
+ p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+  ggplot() + coord_cartesian(ylim=c(0,4)) +
+  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+  geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
+  geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+  scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
+  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+  xlab("Proportion of bites during the evening coverage gap") +
+  ylab("EIR (bites per year)")
+
  return(p)
 }

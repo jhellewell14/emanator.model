@@ -45,32 +45,32 @@ mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
 #' @keywords internal
 find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
-                              em_cov,itn_cov){
+                              em_cov,itn_cov,Q0){
 
   EIR_min <- find_EIR_boundary(step=1,EIR_min = 0,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov)
+                               em_cov,itn_cov,Q0)
 
   # 2nd digit
   EIR_min <- find_EIR_boundary(step=0.1,EIR_min = EIR_min,
                                r_EM0,em_loss,
                                surv_bioassay=0,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov)
+                               em_cov,itn_cov,Q0)
   # 3rd digit
   EIR_min <- find_EIR_boundary(step=0.01,EIR_min = EIR_min,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov)
+                               em_cov,itn_cov,Q0)
   # 4th digit
   EIR_min <- find_EIR_boundary(step=0.001,EIR_min = EIR_min,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov)
+                               em_cov,itn_cov,Q0)
   return(EIR_min)
 }
 
@@ -80,7 +80,7 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
 #' @keywords internal
 find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
-                              em_cov,itn_cov){
+                              em_cov,itn_cov,Q0){
   EIR_min <- ifelse(EIR_min==0,0.0001,EIR_min)
   EIR_max <- EIR_min + step
   elim <- FALSE
@@ -93,7 +93,7 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                          bites_Indoors,
                          bites_Bed,
                          em_cov,
-                         itn_cov)
+                         itn_cov,Q0)
 
     if(temp$min==TRUE & temp$max==FALSE){ # when EIR_min causes elimination but EIR_max does not
       elim<-TRUE
@@ -110,7 +110,7 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
 #' @keywords internal
 compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                          bites_Emanator,bites_Indoors,bites_Bed,
-                         em_cov,itn_cov){
+                         em_cov,itn_cov,Q0){
 
   # Model runs
   run_min <- mr(em_cov=em_cov,itn_cov=itn_cov,
@@ -119,7 +119,7 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 bites_Bed=bites_Bed,
                 init_EIR=EIR_min,# EIR min
                 r_EM0=r_EM0,em_loss=em_loss,
-                surv_bioassay = surv_bioassay)
+                surv_bioassay = surv_bioassay,Q0=Q0)
 
   run_max <- mr(em_cov=em_cov,itn_cov=itn_cov,
                 bites_Emanator=bites_Emanator,
@@ -127,7 +127,7 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 bites_Bed=bites_Bed,
                 init_EIR=EIR_max, # EIR max
                 r_EM0=r_EM0,em_loss=em_loss,
-                surv_bioassay = surv_bioassay)
+                surv_bioassay = surv_bioassay,Q0=Q0)
 
   return(list(min=elim(run_min),max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
 }

@@ -7,7 +7,7 @@ This function performs model runs with specified parameters. Some default parame
 be specified each time to guarantee that parameter values aren't incorrectly passed.}
 \usage{
 mr(em_cov, itn_cov, bites_Emanator, bites_Indoors, bites_Bed,
-  r_EM0 = 0.6053263, em_loss = 0.001954954, d_EM0 = 0,
+  r_EM0 = 0.6053263, em_loss = 0.001954954, d_EM0 = 0, Q0 = 0.92,
   surv_bioassay = 0, init_EIR, ...)
 }
 \value{
