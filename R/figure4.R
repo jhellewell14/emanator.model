@@ -105,7 +105,7 @@ figure4b <- function(){
              bites_Bed=bites_Bed,
              init_EIR=init_EIR) # ITN + EM
 
-  p <- data.frame(x=1:(365*16),itn=nr1$prev,em=both$prev) %>%
+  p <- data.frame(x=1:(365*14),itn=nr1$prev,em=both$prev) %>%
     ggplot(aes(x=x)) + theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18,axis_title_just = "centre") +
     geom_line(aes(y=itn)) +
     geom_line(aes(y=em),col="red") +
