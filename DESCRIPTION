@@ -15,7 +15,8 @@ Depends:
    hanojoel,
    hrbrthemes,
    cowplot,
-   viridis
+   viridis,
+   wesanderson
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

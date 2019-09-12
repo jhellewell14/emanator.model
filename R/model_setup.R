@@ -16,7 +16,7 @@ mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
                                   d_EM0 = d_EM0,
                                   r_EM0 = r_EM0,
                                   irs_cov = em_cov,
-                                  em_cov = em_cov, # this is a hack to make my old code work with the new model framework
+                                  em_cov = em_cov, # this is quick and dirty way of making emanator coverages work with model initialisation code
                                   itn_cov = itn_cov,
                                   EM_interval = 365,
                                   ITN_interval = 365*3,
@@ -42,7 +42,7 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
 
   # 2nd digit
   EIR_min <- find_EIR_boundary(step=0.1,EIR_min = EIR_min,
-                               r_EM0 = 0.6053263,em_loss=0.001954954,
+                               r_EM0,em_loss,
                                surv_bioassay=0,
                                bites_Emanator,bites_Indoors,bites_Bed,
                                em_cov,itn_cov)
@@ -78,14 +78,14 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                          em_cov,
                          itn_cov)
 
-    if(temp$min==TRUE & temp$max==FALSE){
+    if(temp$min==TRUE & temp$max==FALSE){ # when EIR_min causes elimination but EIR_max does not
       elim<-TRUE
-    }else{
+    }else{ # otherwise increase to next value
       EIR_min <- EIR_min + step
       EIR_max <- EIR_min + step
     }
   }
-  return(round(EIR_min,3))
+  return(round(EIR_min,3)) # return minimum (rounded to get rid of 0.0001 if you started at 0)
 }
 
 compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
@@ -109,7 +109,7 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 r_EM0=r_EM0,em_loss=em_loss,
                 surv_bioassay = surv_bioassay)
 
-  return(list(min=elim(run_min),max=elim(run_max)))
+  return(list(min=elim(run_min),max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
 }
 
 elim <- function(mod_run){

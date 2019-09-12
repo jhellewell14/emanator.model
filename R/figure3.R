@@ -1,3 +1,14 @@
+#' Plot Figure 3
+#'
+#' @importFrom ggplot2 ggplot geom_line geom_ribbon scale_x_continuous coord_cartesian scale_y_continuous theme geom_vline xlab ylab scale_fill_discrete geom_histogram theme_minimal
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom cowplot plot_grid
+#' @importFrom tidyr gather
+#' @importFrom RColorBrewer brewer.pal
+#' @return plot
+#' @author Joel Hellewell
+#' @export
 figure3 <- function(){
 
  # load behaviour data

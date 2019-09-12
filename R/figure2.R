@@ -1,3 +1,10 @@
+#' Plot Figure 2
+#'
+#' @importFrom ggplot2 ggplot geom_point geom_errorbar geom_line geom_hline geom_vline scale_x_continuous scale_y_continuous xlab ylab theme_bw theme
+#' @importFrom cowplot plot_grid
+#' @return plot
+#' @author Joel Hellewell
+#' @export
 figure2 <- function(){
 
  # Summarised field trial data
