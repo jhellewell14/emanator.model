@@ -77,12 +77,14 @@ figure4b <- function(){
   bites_Bed <- 0.8813754*bites_Indoors # this is bed to indoors ratio
   init_EIR <- 4.3
 
-  nr1 <- mr(em_cov=0,itn_cov=0.8,bites_Emanator=bites_Emanator,
+  nr1 <- mr(em_cov=0,itn_cov=0.8,
+            bites_Emanator=bites_Emanator,
             bites_Indoors=bites_Indoors,
             bites_Bed=bites_Bed,
             init_EIR=init_EIR) # ITN only
 
-  both <- mr(em_cov=0.8,itn_cov=0.8,bites_Emanator=bites_Emanator,
+  both <- mr(em_cov=0.8,itn_cov=0.8,
+             bites_Emanator=bites_Emanator,
              bites_Indoors=bites_Indoors,
              bites_Bed=bites_Bed,
              init_EIR=init_EIR) # ITN + EM
@@ -102,3 +104,92 @@ figure4b <- function(){
   return(p)
 }
 
+figure4c <- function(){
+
+  dm <- matrix(0,ncol=11,nrow=30)
+
+  for(j in 0:10){ # outdoor exposure 0%->50%
+    for(i in 1:30){ # EIR 1->30
+      init_EIR <- i
+      bites_Indoors <- 1-(0.05*j)
+      bites_Emanator <- 1 - bites_Indoors
+      bites_Bed <- 0.8813754*bites_Indoors
+
+      # ITN only
+      nr1 <- mr(em_cov=0,itn_cov=0.8,
+                bites_Emanator=bites_Emanator,
+                bites_Indoors=bites_Indoors,
+                bites_Bed=bites_Bed,
+                init_EIR=init_EIR)
+      # ITN + EM
+      both <- mr(em_cov=0.8,itn_cov=0.8,
+                 bites_Emanator=bites_Emanator,
+                 bites_Indoors=bites_Indoors,
+                 bites_Bed=bites_Bed,
+                 init_EIR=init_EIR)
+
+      # change in incidence per 1000 0-5 year olds
+      dm[i,j+1] <- sum(nr1$inc05[(365*5):(365*6)]-both$inc05[(365*5):(365*6)])*1000
+      print(paste("Model run",(j)*30+i,"of 330"))
+    }
+  }
+
+  # Plot output
+  ca <- data.frame(z=as.vector(dm),y=rep(1:30,10),x=rep(seq(0.1,0.5,0.1),rep(30,5)))
+  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
+    scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+    scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
+                       breaks=seq(0,180,30)) + theme_minimal() +
+    theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
+  return(p)
+}
+
+figure4d <- function(){
+
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+
+  for(i in 1:5){ #10% -> 50% outdoor biting exposure
+    print(paste("Outdoor exposure = ",i*0.1))
+    bites_Emanator <- i*0.1
+    bites_Indoors <- 1 - bites_Emanator
+    bites_Bed <- 0.8813754*bites_Indoors
+    em_cov <- 0
+    # ITN elimination
+    # 1st digit
+    print("ITN")
+    ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                     surv_bioassay=0,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov)
+
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                     surv_bioassay=0,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov)
+  }
+
+  hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3.7)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.25,ymin=high),fill=hi[1]) +
+    # geom_line(aes(x=x,y=low*365)) +
+    # geom_line(aes(x=x,y=high*365))
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+    # scale_y_continuous(breaks=seq(0,150,30)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Proportion of bites during the evening coverage gap") +
+    ylab("EIR (bites per year)")
+
+  return(p)
+}
