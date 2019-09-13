@@ -163,7 +163,7 @@ figure5c <- function(){
   ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                    surv_bioassay=0,
                                    bites_Emanator,bites_Indoors,bites_Bed,
-                                   em_cov,itn_cov,Q0=0.16)
+                                   em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
   # ITM + EM
   em_cov <- 0.8
@@ -171,7 +171,7 @@ figure5c <- function(){
   ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                       surv_bioassay=0,
                                       bites_Emanator,bites_Indoors,bites_Bed,
-                                      em_cov,itn_cov,Q0=0.16)
+                                      em_cov,itn_cov,Q0=0.16,d_EM0=0)
  }
 
  hi <- wes_palette(n=3,name="FantasticFox1")
@@ -220,7 +220,7 @@ figure5d <- function(){
   ITN_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
                                    surv_bioassay=0,
                                    bites_Emanator,bites_Indoors,bites_Bed,
-                                   em_cov,itn_cov,Q0=0.16)
+                                   em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
   # ITM + EM
   em_cov <- 0.8
@@ -228,7 +228,7 @@ figure5d <- function(){
   ITN_EM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
                                       surv_bioassay=0,
                                       bites_Emanator,bites_Indoors,bites_Bed,
-                                      em_cov,itn_cov,Q0=0.16)
+                                      em_cov,itn_cov,Q0=0.16,d_EM0=0)
  }
 
  hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
