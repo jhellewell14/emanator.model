@@ -177,11 +177,11 @@ figure5c <- function(){
  hi <- wes_palette(n=3,name="FantasticFox1")
 
  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-  ggplot() + coord_cartesian(ylim=c(0,4)) +
+  ggplot() + coord_cartesian(ylim=c(0,2)) +
   geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
   geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-  geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-  geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+  geom_ribbon(aes(x=x,ymax=2,ymin=high),fill=hi[1]) +
+  geom_hline(yintercept=seq(0,2,0.5),lty=2,alpha=0.5) +
   geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
   scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
   theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
@@ -234,11 +234,11 @@ figure5d <- function(){
  hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
 
  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-  ggplot() + coord_cartesian(ylim=c(0,4)) +
+  ggplot() + coord_cartesian(ylim=c(0,2)) +
   geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
   geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-  geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-  geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+  geom_ribbon(aes(x=x,ymax=2,ymin=high),fill=hi[1]) +
+  geom_hline(yintercept=seq(0,2,0.5),lty=2,alpha=0.5) +
   geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
   scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
   theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +

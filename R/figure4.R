@@ -24,7 +24,6 @@ figure4a <- function(){
     bites_Emanator <- seq(0,0.4,0.05)[i]
     bites_Indoors <- 1 - bites_Emanator
     bites_Bed <- bites_Indoors*bed_to_indoors_ratio
-    init_EIR <- 30
 
     itnonly <- mr(itn_cov=0.5,em_cov=0,
                   bites_Emanator=bites_Emanator,
