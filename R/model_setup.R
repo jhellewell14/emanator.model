@@ -4,7 +4,7 @@
 #' @importFrom ICDMM create_r_model
 #' @return A list of all of the different outputs from the model
 #' @author Joel Hellewell
-#' @keywords internal
+#' @export
 mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
                r_EM0=0.6053263,em_loss=0.001954954,d_EM0=0,Q0=0.92,
                surv_bioassay=0,init_EIR,...){
@@ -42,7 +42,7 @@ mr <- function(em_cov,itn_cov,bites_Emanator,bites_Indoors,bites_Bed,
 #' searches until it has found the EIR to 3 decimal places.
 #' @return The minimum EIR value
 #' @author Joel Hellewell
-#' @keywords internal
+#' @export
 find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
                               em_cov,itn_cov,Q0,d_EM0){
@@ -54,11 +54,15 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                                em_cov,itn_cov,Q0,d_EM0)
 
   # 2nd digit
+  print("Second digit")
+  print(EIR_min)
   EIR_min <- find_EIR_boundary(step=0.1,EIR_min = EIR_min,
                                r_EM0,em_loss,
-                               surv_bioassay=0,
+                               surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
                                em_cov,itn_cov,Q0,d_EM0)
+  print("Third digit")
+  print(EIR_min)
   # 3rd digit
   EIR_min <- find_EIR_boundary(step=0.01,EIR_min = EIR_min,
                                r_EM0,em_loss,
@@ -77,15 +81,14 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
 #' Finds the EIR boundary systematically for a given step size
 #' @author Joel Hellewell
 #' @return Minimum EIR value
-#' @keywords internal
+#' @export
 find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                               bites_Emanator,bites_Indoors,bites_Bed,
                               em_cov,itn_cov,Q0,d_EM0){
-  EIR_min <- ifelse(EIR_min==0,0.0001,EIR_min)
   EIR_max <- EIR_min + step
-  elim <- FALSE
-  while(elim==FALSE){
-    print(paste("Trying min:",EIR_min))
+  elim1 <- FALSE
+  while(elim1==FALSE){
+    print(paste("Trying min:",EIR_min,"and max:",EIR_max))
     temp <- compare_elim(EIR_min,EIR_max,
                          r_EM0,em_loss,
                          surv_bioassay,
@@ -96,23 +99,27 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
                          itn_cov,Q0,d_EM0)
 
     if(temp$min==TRUE & temp$max==FALSE){ # when EIR_min causes elimination but EIR_max does not
-      elim<-TRUE
+      elim1<-TRUE
     }else{ # otherwise increase to next value
       EIR_min <- EIR_min + step
       EIR_max <- EIR_min + step
+      elim1 <- FALSE
     }
   }
-  return(round(EIR_min,3)) # return minimum (rounded to get rid of 0.0001 if you started at 0)
+  return(EIR_min) # return minimum (rounded to get rid of 0.0001 if you started at 0)
 }
 
 #' Performs model runs for two EIR values and returns whether they achieve elimination
 #' @author Joel Hellewell
-#' @keywords internal
+#' @export
 compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                          bites_Emanator,bites_Indoors,bites_Bed,
                          em_cov,itn_cov,Q0,d_EM0){
-
+  min_elim <- FALSE
   # Model runs
+  if(EIR_min==0){
+    min_elim <- TRUE
+  }else{
   run_min <- mr(em_cov=em_cov,itn_cov=itn_cov,
                 bites_Emanator=bites_Emanator,
                 bites_Indoors=bites_Indoors,
@@ -120,6 +127,8 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 init_EIR=EIR_min,# EIR min
                 r_EM0=r_EM0,em_loss=em_loss,
                 surv_bioassay = surv_bioassay,Q0=Q0,d_EM0=d_EM0)
+  min_elim <- elim(run_min)
+  }
 
   run_max <- mr(em_cov=em_cov,itn_cov=itn_cov,
                 bites_Emanator=bites_Emanator,
@@ -129,13 +138,14 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 r_EM0=r_EM0,em_loss=em_loss,
                 surv_bioassay = surv_bioassay,Q0=Q0,d_EM0=d_EM0)
 
-  return(list(min=elim(run_min),max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
+  print(paste("min:",min_elim,"max:",elim(run_max)))
+  return(list(min=min_elim,max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
 }
 
 #' Returns whether a run has achieved elimination
 #' @author Joel Hellewell
 #' @return TRUE or FALSE depending on whether elimination is achieved
-#' @keywords internal
+#' @export
 elim <- function(mod_run){
   out <- FALSE
   for(j in 1:3234){

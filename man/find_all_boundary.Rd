@@ -20,4 +20,3 @@ searches until it has found the EIR to 3 decimal places.
 \author{
 Joel Hellewell
 }
-\keyword{internal}

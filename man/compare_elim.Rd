@@ -13,4 +13,3 @@ Performs model runs for two EIR values and returns whether they achieve eliminat
 \author{
 Joel Hellewell
 }
-\keyword{internal}

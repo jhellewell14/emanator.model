@@ -199,13 +199,13 @@ figure6d <- function(){
   bites_Bed <- 0.8813754*bites_Indoors
 
   for(i in 0:5){#0% -> 50% bioassay survival
-    print(paste("Bioassay survival:",i))
+    print(paste("Bioassay survival:",i*0.1))
     surv_bioassay <- i*0.1
     em_cov <- 0
 
     # ITN elimination
     print("ITN")
-    ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                      surv_bioassay=surv_bioassay,
                                      bites_Emanator,bites_Indoors,bites_Bed,
                                      em_cov,itn_cov,Q0=0.16,d_EM0=0)
@@ -213,7 +213,7 @@ figure6d <- function(){
     # ITM + EM
     em_cov <- 0.8
     print("ITN + EM")
-    ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                         surv_bioassay=surv_bioassay,
                                         bites_Emanator,bites_Indoors,bites_Bed,
                                         em_cov,itn_cov,Q0=0.16,d_EM0=0)
@@ -222,11 +222,11 @@ figure6d <- function(){
   hi <- wes_palette(n=3,name="FantasticFox1")
 
   p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+    ggplot() + coord_cartesian(ylim=c(0,1)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
     geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_hline(yintercept=seq(0,1,0.25),lty=2,alpha=0.5) +
     geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
     scale_y_continuous(breaks=seq(0,3,0.5)) +
@@ -265,7 +265,7 @@ figure6e <- function(){
 
     # ITN elimination
     print("ITN")
-    ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                      surv_bioassay=surv_bioassay,
                                      bites_Emanator,bites_Indoors,bites_Bed,
                                      em_cov,itn_cov,Q0=0.16,d_EM0=0.2)
@@ -273,7 +273,7 @@ figure6e <- function(){
     # ITM + EM
     em_cov <- 0.8
     print("ITN + EM")
-    ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                         surv_bioassay=surv_bioassay,
                                         bites_Emanator,bites_Indoors,bites_Bed,
                                         em_cov,itn_cov,Q0=0.16,d_EM0=0.2)

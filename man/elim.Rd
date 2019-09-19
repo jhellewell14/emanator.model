@@ -15,4 +15,3 @@ Returns whether a run has achieved elimination
 \author{
 Joel Hellewell
 }
-\keyword{internal}

@@ -16,4 +16,3 @@ Finds the EIR boundary systematically for a given step size
 \author{
 Joel Hellewell
 }
-\keyword{internal}
