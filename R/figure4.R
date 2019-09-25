@@ -160,8 +160,8 @@ figure4c <- function(){
   }
 
   # Plot output
-  ca <- data.frame(z=as.vector(dm),y=rep(1:30,10),x=rep(seq(0.1,0.5,0.1),rep(30,5)))
-  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
+  ca <- data.frame(z=as.vector(dm),y=rep(1:30,11),x=rep(seq(0,0.5,0.05),rep(30,11)))
+  p <- ca %>% dplyr::filter(x>=0.1) %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
     scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
     scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
                        breaks=seq(0,180,30)) + theme_minimal() +
