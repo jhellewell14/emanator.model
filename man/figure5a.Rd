@@ -10,7 +10,8 @@ figure5a()
 plot
 }
 \description{
-This performs 9 model runs in total
+This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+combinations will eliminate for varying levels of bioassay survival in the local gambiae-like vector population.
 }
 \author{
 Joel Hellewell

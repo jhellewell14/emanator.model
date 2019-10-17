@@ -51,7 +51,7 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov,Q0,d_EM0)
+                               em_cov,itn_cov,Q0,d_EM0)$EIR
 
   # 2nd digit
   print("Second digit")
@@ -60,7 +60,7 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov,Q0,d_EM0)
+                               em_cov,itn_cov,Q0,d_EM0)$EIR
   print("Third digit")
   print(EIR_min)
   # 3rd digit
@@ -68,14 +68,14 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov,Q0,d_EM0)
+                               em_cov,itn_cov,Q0,d_EM0)$EIR
   # 4th digit
   EIR_min <- find_EIR_boundary(step=0.001,EIR_min = EIR_min,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
                                em_cov,itn_cov,Q0,d_EM0)
-  return(EIR_min)
+  return(EIR_min$preprev)
 }
 
 #' Finds the EIR boundary systematically for a given step size
@@ -106,7 +106,7 @@ find_EIR_boundary <- function(step,EIR_min,r_EM0,em_loss,surv_bioassay,
       elim1 <- FALSE
     }
   }
-  return(EIR_min) # return minimum (rounded to get rid of 0.0001 if you started at 0)
+  return(list(EIR=EIR_min,preprev=temp$preprev)) # return minimum (rounded to get rid of 0.0001 if you started at 0)
 }
 
 #' Performs model runs for two EIR values and returns whether they achieve elimination
@@ -119,6 +119,7 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
   # Model runs
   if(EIR_min==0){
     min_elim <- TRUE
+    preprev <- 0
   }else{
   run_min <- mr(em_cov=em_cov,itn_cov=itn_cov,
                 bites_Emanator=bites_Emanator,
@@ -128,6 +129,9 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 r_EM0=r_EM0,em_loss=em_loss,
                 surv_bioassay = surv_bioassay,Q0=Q0,d_EM0=d_EM0)
   min_elim <- elim(run_min)
+  preprev <- run_min$prev[50]
+  plot(run_min$prev)
+  abline(h=0.01)
   }
 
   run_max <- mr(em_cov=em_cov,itn_cov=itn_cov,
@@ -139,7 +143,8 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 surv_bioassay = surv_bioassay,Q0=Q0,d_EM0=d_EM0)
 
   print(paste("min:",min_elim,"max:",elim(run_max)))
-  return(list(min=min_elim,max=elim(run_max))) # Returns TRUE/FALSE for each run if it eliminated
+  print(paste("Pre-intervention EIR:",preprev))
+  return(list(min=min_elim,max=elim(run_max),preprev=preprev)) # Returns TRUE/FALSE for each run if it eliminated
 }
 
 #' Returns whether a run has achieved elimination
@@ -150,7 +155,9 @@ elim <- function(mod_run){
   out <- FALSE
   for(j in 1:3234){
     # Checks for a period of 50 consecutive days when all-age prev is less than 0.0149%
-    if(all(mod_run$allprev[((365*5)+j):((365*5)+j+50)] < 0.000149)==TRUE){out<-TRUE}
+    # if(all(mod_run$allprev[((365*5)+j):((365*5)+j+50)] < 0.000149)==TRUE){out<-TRUE}
+    # Checks for a period of 50 consecutive days when prevalence in 0-5 year olds is less than 1%
+    if(all(mod_run$prev[((365*5)+j):((365*5)+j+50)] < 0.01)==TRUE){out<-TRUE}
   }
   return(out)
 }

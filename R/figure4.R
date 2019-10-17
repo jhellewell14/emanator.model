@@ -24,17 +24,18 @@ figure4a <- function(){
     bites_Emanator <- seq(0,0.4,0.05)[i]
     bites_Indoors <- 1 - bites_Emanator
     bites_Bed <- bites_Indoors*bed_to_indoors_ratio
+    init_EIR <- 30
 
     itnonly <- mr(itn_cov=0.5,em_cov=0,
                   bites_Emanator=bites_Emanator,
                   bites_Indoors=bites_Indoors,
                   bites_Bed=bites_Bed,
-                  init_EIR=init_EIR)
+                  init_EIR=init_EIR,Q0=0.16)
     itnonly2 <- mr(itn_cov=0.8,em_cov=0,
                    bites_Emanator=bites_Emanator,
                    bites_Indoors=bites_Indoors,
                    bites_Bed=bites_Bed,
-                   init_EIR=init_EIR)
+                   init_EIR=init_EIR,Q0=0.16)
 
     r_EM0 <- 1
     em_loss <- 0
@@ -43,18 +44,24 @@ figure4a <- function(){
                      bites_Indoors=bites_Indoors,
                      bites_Bed=bites_Bed,
                      init_EIR=init_EIR,
-                     r_EM0 = 1,em_loss=0)
+                     r_EM0 = 1,em_loss=0,Q0=0.16)
     no_outdoor2 <- mr(itn_cov=0.8,em_cov=1,
                       bites_Emanator=bites_Emanator,
                       bites_Indoors=bites_Indoors,
                       bites_Bed=bites_Bed,
                       init_EIR=init_EIR,
-                      r_EM0 = 1,em_loss=0)
+                      r_EM0 = 1,em_loss=0,Q0=0.16)
 
     outdoor_exp_low[i] <- sum(itnonly$inc05[(365*5):(365*6)]-no_outdoor$inc05[(365*5):(365*6)])/sum(itnonly$inc05[(365*5):(365*6)])
     outdoor_exp_high[i] <- sum(itnonly2$inc05[(365*5):(365*6)]-no_outdoor2$inc05[(365*5):(365*6)])/sum(itnonly2$inc05[(365*5):(365*6)])
     k <- k + 1
   }
+
+  # Output for gambiae-like mosquito
+  gamb_df <- data.frame(
+    x = seq(0,0.4,0.05),
+    gamb_out_low = c(0.00000000,0.09174768,0.17582614,0.25186418,0.32233376,0.38625619,0.44475916,0.49877595,0.54799187),
+    gamb_out_high = c(0.0000000,0.1113744,0.2150535,0.3121984,0.4024373,0.4815407,0.5515633,0.6123888,0.6654937))
 
   # Plot output
   yo <- wesanderson::wes_palette(name="IsleofDogs1",n=2)
@@ -62,6 +69,8 @@ figure4a <- function(){
   p <- data.frame(x=seq(0,0.4,0.05),outdoor_exp_low,outdoor_exp_high) %>% ggplot() +
     geom_line(aes(x,outdoor_exp_low),size=1.2,col=yo[[1]]) +
     geom_line(aes(x,outdoor_exp_high),size=1.2,col=yo[[2]]) +
+    geom_line(data=gamb_df,aes(x=x,y=gamb_out_low),size=1.2,alpha=0.4,col=yo[[1]],lty=2) +
+    geom_line(data=gamb_df,aes(x=x,y=gamb_out_high),size=1.2,alpha=0.4,col=yo[[2]],lty=2) +
     theme_bw() +
     scale_x_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
     scale_y_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
@@ -78,7 +87,7 @@ figure4a <- function(){
 
 #' Plot Figure 4b
 #'
-#' This performs 1 model run in total
+#' This performs 4 model runs in total
 #' @importFrom ggplot2 ggplot geom_line geom_hline coord_cartesian scale_y_continuous scale_x_continuous geom_vline xlab ylab
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
 #' @importFrom hrbrthemes theme_ipsum_ps
@@ -104,11 +113,26 @@ figure4b <- function(){
              bites_Bed=bites_Bed,
              init_EIR=init_EIR) # ITN + EM
 
-  p <- data.frame(x=1:(365*14),itn=nr1$prev,em=both$prev) %>%
+  nr1low <- mr(em_cov=0,itn_cov=0.8,
+            bites_Emanator=bites_Emanator,
+            bites_Indoors=bites_Indoors,
+            bites_Bed=bites_Bed,
+            init_EIR=init_EIR,Q0=0.16) # ITN only
+
+  bothlow <- mr(em_cov=0.8,itn_cov=0.8,
+             bites_Emanator=bites_Emanator,
+             bites_Indoors=bites_Indoors,
+             bites_Bed=bites_Bed,
+             init_EIR=init_EIR,Q0=0.16) # ITN + EM
+
+  p <- data.frame(x=1:(365*14),itn=nr1$prev,em=both$prev,itnlow=nr1low$prev,emlow=bothlow$prev) %>%
     ggplot(aes(x=x)) + theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18,axis_title_just = "centre") +
+    geom_hline(yintercept=c(0.01,0.08224412),lty=2,alpha=0.6)+
     geom_line(aes(y=itn)) +
     geom_line(aes(y=em),col="red") +
-    geom_hline(yintercept=c(0.000149,0.08224412),lty=2) +
+    geom_line(aes(y=itnlow),lty=2) +
+    geom_line(aes(y=emlow),col="red",lty=2) +
+    #geom_hline(yintercept=c(0.000149,0.08224412),lty=2) +
     coord_cartesian(xlim=c((365*4):(361*14))) +
     scale_y_continuous(breaks=seq(0,0.08,0.02),labels=paste(seq(0,8,2),"%",sep="")) +
     scale_x_continuous(breaks=seq((365*5),(365*14),(365*3)),labels=paste(seq(0,9,3),sep="")) +
@@ -171,6 +195,56 @@ figure4c <- function(){
 
 #' Plot Figure 4d
 #'
+#' This performs 330 model runs in total, it will take some time.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab scale_x_continuous
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom viridis scale_fill_viridis
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @return plot
+#' @author Joel Hellewell
+#' @export
+figure4d <- function(){
+
+  dm <- matrix(0,ncol=11,nrow=30)
+
+  for(j in 0:10){ # outdoor exposure 0%->50%
+    for(i in 1:30){ # EIR 1->30
+      init_EIR <- i
+      bites_Indoors <- 1-(0.05*j)
+      bites_Emanator <- 1 - bites_Indoors
+      bites_Bed <- 0.8813754*bites_Indoors
+
+      # ITN only
+      nr1 <- mr(em_cov=0,itn_cov=0.8,
+                bites_Emanator=bites_Emanator,
+                bites_Indoors=bites_Indoors,
+                bites_Bed=bites_Bed,
+                init_EIR=init_EIR,Q0=0.16)
+      # ITN + EM
+      both <- mr(em_cov=0.8,itn_cov=0.8,
+                 bites_Emanator=bites_Emanator,
+                 bites_Indoors=bites_Indoors,
+                 bites_Bed=bites_Bed,
+                 init_EIR=init_EIR,Q0=0.16)
+
+      # change in incidence per 1000 0-5 year olds
+      dm[i,j+1] <- sum(nr1$inc05[(365*5):(365*6)]-both$inc05[(365*5):(365*6)])*1000
+      print(paste("Model run",(j)*30+i,"of 330"))
+    }
+  }
+
+  # Plot output
+  ca <- data.frame(z=as.vector(dm),y=rep(1:30,10),x=rep(seq(0.1,0.5,0.1),rep(30,5)))
+  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
+    scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+    scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
+                       breaks=seq(0,180,30)) + theme_minimal() +
+    theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
+  return(p)
+}
+
+#' Plot Figure 4e
+#'
 #' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
 #' combinations will eliminate for varying levels of outdoor exposure.
 #' @importFrom wesanderson wes_palette
@@ -180,10 +254,11 @@ figure4c <- function(){
 #' @return plot
 #' @author Joel Hellewell
 #' @export
-figure4d <- function(){
+figure4e <- function(){
 
   ITN_elim <- c()
   ITN_EM_elim <- c()
+  ITN_optEM_elim <- c()
   itn_cov <- 0.8
 
   for(i in 1:5){ #10% -> 50% outdoor biting exposure
@@ -206,41 +281,50 @@ figure4d <- function(){
                                         surv_bioassay=0,
                                         bites_Emanator,bites_Indoors,bites_Bed,
                                         em_cov,itn_cov,Q0=0.92,d_EM0=0)
+
+    print("ITN + optimum EM")
+    ITN_optEM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                        surv_bioassay=0,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.92,d_EM0=0)
   }
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,4)) +
+  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100,opt=ITN_optEM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
     geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+    geom_line(aes(x=x,y=opt),lty=2,fill=hi[2]) +
+    geom_hline(yintercept=seq(0,22,2),lty=2,alpha=0.5) +
     geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,22,2),paste0(seq(0,22,2),"%")) +
     theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Proportion of bites during the evening coverage gap") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
 
-#' Plot Figure 4e
+#' Plot Figure 4f
 #'
 #' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
 #' combinations will eliminate for varying levels of outdoor exposure.
 #' @importFrom wesanderson wes_palette
-#' @importFrom hrbrthemes theme_ipsum_ps
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
 #' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
 #' @return plot
 #' @author Joel Hellewell
 #' @export
-figure4e <- function(){
+figure4f <- function(){
 
   ITN_elim <- c()
   ITN_EM_elim <- c()
+  ITM_optEM_elim <- c()
   itn_cov <- 0.8
 
   for(i in 1:5){ #10% -> 50% outdoor biting exposure
@@ -251,39 +335,46 @@ figure4e <- function(){
     em_cov <- 0
     # ITN elimination
     print("ITN")
-    ITN_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+    ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                      surv_bioassay=0,
                                      bites_Emanator,bites_Indoors,bites_Bed,
-                                     em_cov,itn_cov,Q0=0.92,d_EM0=0)
+                                     em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
     # ITM + EM
     em_cov <- 0.8
     print("ITN + EM")
-    ITN_EM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+    ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
                                         surv_bioassay=0,
                                         bites_Emanator,bites_Indoors,bites_Bed,
-                                        em_cov,itn_cov,Q0=0.92,d_EM0=0)
+                                        em_cov,itn_cov,Q0=0.16,d_EM0=0)
+
+    ITN_optEM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                           surv_bioassay=0,
+                                           bites_Emanator,bites_Indoors,bites_Bed,
+                                           em_cov,itn_cov,Q0=0.16,d_EM0=0)
   }
 
-  hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
+  hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,4)) +
+  p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100,opt=ITN_optEM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
     geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,4,0.5),lty=2,alpha=0.5) +
+    geom_line(aes(x=x,y=opt),lty=2,fill=hi[2]) +
+    geom_hline(yintercept=seq(0,22,2),lty=2,alpha=0.5) +
     geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,22,2),paste0(seq(0,22,2),"%")) +
     theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Proportion of bites during the evening coverage gap") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
 
-#' Plot Figure 4f
+#' Plot Figure supp 1
 #' This performs no model runs.
 #' @importFrom wesanderson wes_palette
 #' @importFrom hrbrthemes theme_ipsum_ps
@@ -292,7 +383,7 @@ figure4e <- function(){
 #' @return plot
 #' @author Joel Hellewell
 #' @export
-figure4f <- function(){
+figuresupp1 <- function(){
 
   r_EM0 <- 0.6053263
 

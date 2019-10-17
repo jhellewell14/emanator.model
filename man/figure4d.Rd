@@ -10,8 +10,7 @@ figure4d()
 plot
 }
 \description{
-This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
-combinations will eliminate for varying levels of outdoor exposure.
+This performs 330 model runs in total, it will take some time.
 }
 \author{
 Joel Hellewell

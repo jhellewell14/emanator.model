@@ -1,144 +1,127 @@
 #' Plot Figure 5a
 #'
-#' This performs 9 model runs in total
-#' @importFrom ggplot2 ggplot geom_line xlab ylab scale_x_continuous theme_bw scale_x_continuous scale_y_continuous geom_abline theme
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of bioassay survival in the local gambiae-like vector population.
 #' @importFrom wesanderson wes_palette
-#' @importFrom hrbrthemes theme_ipsum_ps
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
 #' @return plot
 #' @author Joel Hellewell
 #' @export
 figure5a <- function(){
 
- bed_to_indoors_ratio <- 0.7851768/0.8908540
- init_EIR <- 30
- outdoor_exp_low <- c()
- outdoor_exp_high <- c()
- k <- 1
+ ITN_elim <- c()
+ ITN_EM_elim <- c()
+ itn_cov <- 0.8
+ bites_Emanator <- 0.2
+ bites_Indoors <- 1 - bites_Emanator
+ bites_Bed <- 0.8813754*bites_Indoors
 
+ for(i in 0:5){#0% -> 50% bioassay survival
+  print(paste("Bioassay survival:",i))
+  surv_bioassay <- i*0.1
+  em_cov <- 0
 
- # Model runs
+  # ITN elimination
+  print("ITN")
+  ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                   surv_bioassay=surv_bioassay,
+                                   bites_Emanator,bites_Indoors,bites_Bed,
+                                   em_cov,itn_cov,Q0=0.92,d_EM0=0)
 
- for(i in 1:9){
-  print(paste("Run",k,"of 9"))
-  bites_Emanator <- seq(0,0.4,0.05)[i]
-  bites_Indoors <- 1 - bites_Emanator
-  bites_Bed <- bites_Indoors*bed_to_indoors_ratio
-  init_EIR <- 30
-
-  itnonly <- mr(itn_cov=0.5,em_cov=0,
-                bites_Emanator=bites_Emanator,
-                bites_Indoors=bites_Indoors,
-                bites_Bed=bites_Bed,
-                init_EIR=init_EIR,Q0=0.16)
-  itnonly2 <- mr(itn_cov=0.8,em_cov=0,
-                 bites_Emanator=bites_Emanator,
-                 bites_Indoors=bites_Indoors,
-                 bites_Bed=bites_Bed,
-                 init_EIR=init_EIR,Q0=0.16)
-
-  r_EM0 <- 1
-  em_loss <- 0
-  no_outdoor <- mr(itn_cov=0.5,em_cov=1,
-                   bites_Emanator=bites_Emanator,
-                   bites_Indoors=bites_Indoors,
-                   bites_Bed=bites_Bed,
-                   init_EIR=init_EIR,
-                   r_EM0 = 1,em_loss=0,Q0=0.16)
-  no_outdoor2 <- mr(itn_cov=0.8,em_cov=1,
-                    bites_Emanator=bites_Emanator,
-                    bites_Indoors=bites_Indoors,
-                    bites_Bed=bites_Bed,
-                    init_EIR=init_EIR,
-                    r_EM0 = 1,em_loss=0,Q0=0.16)
-
-  outdoor_exp_low[i] <- sum(itnonly$inc05[(365*5):(365*6)]-no_outdoor$inc05[(365*5):(365*6)])/sum(itnonly$inc05[(365*5):(365*6)])
-  outdoor_exp_high[i] <- sum(itnonly2$inc05[(365*5):(365*6)]-no_outdoor2$inc05[(365*5):(365*6)])/sum(itnonly2$inc05[(365*5):(365*6)])
-  k <- k + 1
+  # ITM + EM
+  em_cov <- 0.8
+  print("ITN + EM")
+  ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                      surv_bioassay=surv_bioassay,
+                                      bites_Emanator,bites_Indoors,bites_Bed,
+                                      em_cov,itn_cov,Q0=0.92,d_EM0=0)
  }
 
- # Output for gambiae-like mosquito
- gamb_df <- data.frame(
-  x = seq(0,0.4,0.05),
-  gamb_out_low = c(0.00000000,0.09174768,0.17582614,0.25186418,0.32233376,0.38625619,0.44475916,0.49877595,0.54799187),
-  gamb_out_high = c(0.0000000,0.1113744,0.2150535,0.3121984,0.4024373,0.4815407,0.5515633,0.6123888,0.6654937))
+ hi <- wes_palette(n=3,name="FantasticFox1")
 
- # Plot output
- yo <- wesanderson::wes_palette(name="IsleofDogs1",n=2)
-
- p <- data.frame(x=seq(0,0.4,0.05),outdoor_exp_low,outdoor_exp_high) %>% ggplot() +
-  geom_line(aes(x,outdoor_exp_low),size=1.2,col=yo[[1]]) +
-  geom_line(aes(x,outdoor_exp_high),size=1.2,col=yo[[2]]) +
-  geom_line(data=gamb_df,aes(x=x,y=gamb_out_low),size=1.2,alpha=0.4,col=yo[[1]],lty=2) +
-  geom_line(data=gamb_df,aes(x=x,y=gamb_out_high),size=1.2,alpha=0.4,col=yo[[2]],lty=2) +
-  theme_bw() +
-  scale_x_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
-  scale_y_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text = element_text(size=18),
-        axis.title = element_text(size=20)) +
-  theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18,axis_title_just = "centre") +
-  xlab("Proportion of feeding attempts that happen outdoors") +
-  ylab("Percentage of cases due to bites happening outdoors") +
-  geom_abline(slope = 1,intercept = 0,lty=2)
+ p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+  ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+  geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+  geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+  scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+  scale_y_continuous(breaks=seq(0,3,0.5)) +
+  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+  xlab("Resistance test (% survival)") +
+  ylab("EIR (bites per year)")
 
  return(p)
 }
 
 #' Plot Figure 5b
 #'
-#' This performs 330 model runs in total, it will take some time.
-#' @importFrom ggplot2 ggplot geom_tile xlab ylab scale_x_continuous
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of bioassay survival in the local gambiae-like vector population. This plot includes a 20% mortality effect.
+#' @importFrom wesanderson wes_palette
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
-#' @importFrom viridis scale_fill_viridis
 #' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
 #' @return plot
 #' @author Joel Hellewell
 #' @export
 figure5b <- function(){
 
- dm <- matrix(0,ncol=11,nrow=30)
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+  bites_Emanator <- 0.2
+  bites_Indoors <- 1 - bites_Emanator
+  bites_Bed <- 0.8813754*bites_Indoors
 
- for(j in 0:10){ # outdoor exposure 0%->50%
-  for(i in 1:30){ # EIR 1->30
-   init_EIR <- i
-   bites_Indoors <- 1-(0.05*j)
-   bites_Emanator <- 1 - bites_Indoors
-   bites_Bed <- 0.8813754*bites_Indoors
+  for(i in 0:5){#0% -> 50% bioassay survival
+    print(paste("Bioassay survival:",i))
+    surv_bioassay <- i*0.1
+    em_cov <- 0
 
-   # ITN only
-   nr1 <- mr(em_cov=0,itn_cov=0.8,
-             bites_Emanator=bites_Emanator,
-             bites_Indoors=bites_Indoors,
-             bites_Bed=bites_Bed,
-             init_EIR=init_EIR,Q0=0.16)
-   # ITN + EM
-   both <- mr(em_cov=0.8,itn_cov=0.8,
-              bites_Emanator=bites_Emanator,
-              bites_Indoors=bites_Indoors,
-              bites_Bed=bites_Bed,
-              init_EIR=init_EIR,Q0=0.16)
+    # ITN elimination
+    print("ITN")
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                     surv_bioassay=surv_bioassay,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov,Q0=0.92,d_EM0=0.2)
 
-   # change in incidence per 1000 0-5 year olds
-   dm[i,j+1] <- sum(nr1$inc05[(365*5):(365*6)]-both$inc05[(365*5):(365*6)])*1000
-   print(paste("Model run",(j)*30+i,"of 330"))
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                        surv_bioassay=surv_bioassay,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.92,d_EM0=0.2)
   }
- }
 
- # Plot output
- ca <- data.frame(z=as.vector(dm),y=rep(1:30,10),x=rep(seq(0.1,0.5,0.1),rep(30,5)))
- p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
-  scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
-  scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
-                     breaks=seq(0,180,30)) + theme_minimal() +
-  theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
- return(p)
+  hi <- wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,3,0.5)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Resistance test (% survival)") +
+    ylab("EIR (bites per year)")
+
+  return(p)
 }
 
 #' Plot Figure 5c
 #'
 #' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
-#' combinations will eliminate for varying levels of outdoor exposure.
+#' combinations will eliminate for varying levels of bioassay survival in the local gambiae-like vector population. This plot is for optimal emanators with 100% repellency and no decay in effect over time.
 #' @importFrom wesanderson wes_palette
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
 #' @importFrom hrbrthemes theme_ipsum_ps
@@ -148,103 +131,229 @@ figure5b <- function(){
 #' @export
 figure5c <- function(){
 
- ITN_elim <- c()
- ITN_EM_elim <- c()
- itn_cov <- 0.8
-
- for(i in 1:5){ #10% -> 50% outdoor biting exposure
-  print(paste("Outdoor exposure = ",i*0.1))
-  bites_Emanator <- i*0.1
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+  bites_Emanator <- 0.2
   bites_Indoors <- 1 - bites_Emanator
   bites_Bed <- 0.8813754*bites_Indoors
-  em_cov <- 0
-  # ITN elimination
-  print("ITN")
-  ITN_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
-                                   surv_bioassay=0,
-                                   bites_Emanator,bites_Indoors,bites_Bed,
-                                   em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
-  # ITM + EM
-  em_cov <- 0.8
-  print("ITN + EM")
-  ITN_EM_elim[i] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
-                                      surv_bioassay=0,
-                                      bites_Emanator,bites_Indoors,bites_Bed,
-                                      em_cov,itn_cov,Q0=0.16,d_EM0=0)
- }
+  for(i in 0:5){#0% -> 50% bioassay survival
+    print(paste("Bioassay survival:",i))
+    surv_bioassay <- i*0.1
+    em_cov <- 0
 
- hi <- wes_palette(n=3,name="FantasticFox1")
+    # ITN elimination
+    print("ITN")
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                     surv_bioassay=surv_bioassay,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov,Q0=0.92,d_EM0=0)
 
- p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-  ggplot() + coord_cartesian(ylim=c(0,2)) +
-  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
-  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-  geom_ribbon(aes(x=x,ymax=2,ymin=high),fill=hi[1]) +
-  geom_hline(yintercept=seq(0,2,0.5),lty=2,alpha=0.5) +
-  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
-  scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
-  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
-  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
-  xlab("Proportion of bites during the evening coverage gap") +
-  ylab("EIR (bites per year)")
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                        surv_bioassay=surv_bioassay,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.92,d_EM0=0)
+  }
 
- return(p)
+  hi <- wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,3,0.5)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Resistance test (% survival)") +
+    ylab("EIR (bites per year)")
+
+  return(p)
 }
 
 #' Plot Figure 5d
 #'
 #' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
-#' combinations will eliminate for varying levels of outdoor exposure.
+#' combinations will eliminate for varying levels of bioassay survival in the local arabiensis-like vector population.
 #' @importFrom wesanderson wes_palette
-#' @importFrom hrbrthemes theme_ipsum_ps
 #' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
 #' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
 #' @return plot
 #' @author Joel Hellewell
 #' @export
 figure5d <- function(){
 
- ITN_elim <- c()
- ITN_EM_elim <- c()
- itn_cov <- 0.8
-
- for(i in 1:5){ #10% -> 50% outdoor biting exposure
-  print(paste("Outdoor exposure = ",i*0.1))
-  bites_Emanator <- i*0.1
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+  bites_Emanator <- 0.2
   bites_Indoors <- 1 - bites_Emanator
   bites_Bed <- 0.8813754*bites_Indoors
-  em_cov <- 0
-  # ITN elimination
-  print("ITN")
-  ITN_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
-                                   surv_bioassay=0,
-                                   bites_Emanator,bites_Indoors,bites_Bed,
-                                   em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
-  # ITM + EM
-  em_cov <- 0.8
-  print("ITN + EM")
-  ITN_EM_elim[i] <- find_all_boundary(r_EM0=1,em_loss=0,
-                                      surv_bioassay=0,
-                                      bites_Emanator,bites_Indoors,bites_Bed,
-                                      em_cov,itn_cov,Q0=0.16,d_EM0=0)
- }
+  for(i in 0:5){#0% -> 50% bioassay survival
+    print(paste("Bioassay survival:",i*0.1))
+    surv_bioassay <- i*0.1
+    em_cov <- 0
 
- hi <- wesanderson::wes_palette(n=3,name="FantasticFox1")
+    # ITN elimination
+    print("ITN")
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                     surv_bioassay=surv_bioassay,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov,Q0=0.16,d_EM0=0)
 
- p <- data.frame(x=seq(0.1,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-  ggplot() + coord_cartesian(ylim=c(0,2)) +
-  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
-  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-  geom_ribbon(aes(x=x,ymax=2,ymin=high),fill=hi[1]) +
-  geom_hline(yintercept=seq(0,2,0.5),lty=2,alpha=0.5) +
-  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
-  scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
-  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
-  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
-  xlab("Proportion of bites during the evening coverage gap") +
-  ylab("EIR (bites per year)")
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                        surv_bioassay=surv_bioassay,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.16,d_EM0=0)
+  }
 
- return(p)
+  hi <- wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,3,0.5)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Resistance test (% survival)") +
+    ylab("EIR (bites per year)")
+
+  return(p)
+}
+
+#' Plot Figure 5e
+#'
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of bioassay survival in the local arabiensis-like vector population. This plot includes a 20% mortality effect.
+#' @importFrom wesanderson wes_palette
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
+#' @return plot
+#' @author Joel Hellewell
+#' @export
+figure5e <- function(){
+
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+  bites_Emanator <- 0.2
+  bites_Indoors <- 1 - bites_Emanator
+  bites_Bed <- 0.8813754*bites_Indoors
+
+  for(i in 0:5){#0% -> 50% bioassay survival
+    print(paste("Bioassay survival:",i))
+    surv_bioassay <- i*0.1
+    em_cov <- 0
+
+    # ITN elimination
+    print("ITN")
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                     surv_bioassay=surv_bioassay,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov,Q0=0.16,d_EM0=0.2)
+
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=0.6053263,em_loss=0.001954954,
+                                        surv_bioassay=surv_bioassay,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.16,d_EM0=0.2)
+  }
+
+  hi <- wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,3,0.5)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Resistance test (% survival)") +
+    ylab("EIR (bites per year)")
+
+  return(p)
+}
+
+#' Plot Figure 5f
+#'
+#' This performs a unknown amount of model runs. It systematically searches for the maximum pre-intervention EIR that ITN and ITN+emanator
+#' combinations will eliminate for varying levels of bioassay survival in the local arabiensis-like vector population. This plot is for optimal emanators with 100% repellency and no decay in effect over time.
+#' @importFrom wesanderson wes_palette
+#' @importFrom dplyr group_by %>% summarise filter mutate full_join
+#' @importFrom hrbrthemes theme_ipsum_ps
+#' @importFrom ggplot2 ggplot coord_cartesian geom_ribbon geom_hline geom_vline scale_x_continuous theme xlab ylab
+#' @return plot
+#' @author Joel Hellewell
+#' @export
+figure5f <- function(){
+
+  ITN_elim <- c()
+  ITN_EM_elim <- c()
+  itn_cov <- 0.8
+  bites_Emanator <- 0.2
+  bites_Indoors <- 1 - bites_Emanator
+  bites_Bed <- 0.8813754*bites_Indoors
+
+  for(i in 0:5){#0% -> 50% bioassay survival
+    print(paste("Bioassay survival:",i))
+    surv_bioassay <- i*0.1
+    em_cov <- 0
+
+    # ITN elimination
+    print("ITN")
+    ITN_elim[i+1] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                     surv_bioassay=surv_bioassay,
+                                     bites_Emanator,bites_Indoors,bites_Bed,
+                                     em_cov,itn_cov,Q0=0.16,d_EM0=0)
+
+    # ITM + EM
+    em_cov <- 0.8
+    print("ITN + EM")
+    ITN_EM_elim[i+1] <- find_all_boundary(r_EM0=1,em_loss=0,
+                                        surv_bioassay=surv_bioassay,
+                                        bites_Emanator,bites_Indoors,bites_Bed,
+                                        em_cov,itn_cov,Q0=0.16,d_EM0=0)
+  }
+
+  hi <- wes_palette(n=3,name="FantasticFox1")
+
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
+    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+    geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+    geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+    scale_y_continuous(breaks=seq(0,3,0.5)) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+    xlab("Resistance test (% survival)") +
+    ylab("EIR (bites per year)")
+
+  return(p)
 }
