@@ -60,21 +60,21 @@ find_all_boundary <- function(r_EM0,em_loss,surv_bioassay,
                                r_EM0,em_loss,
                                surv_bioassay,
                                bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov,Q0,d_EM0)$EIR
-  print("Third digit")
-  print(EIR_min)
-  # 3rd digit
-  EIR_min <- find_EIR_boundary(step=0.01,EIR_min = EIR_min,
-                               r_EM0,em_loss,
-                               surv_bioassay,
-                               bites_Emanator,bites_Indoors,bites_Bed,
-                               em_cov,itn_cov,Q0,d_EM0)$EIR
-  # 4th digit
-  EIR_min <- find_EIR_boundary(step=0.001,EIR_min = EIR_min,
-                               r_EM0,em_loss,
-                               surv_bioassay,
-                               bites_Emanator,bites_Indoors,bites_Bed,
                                em_cov,itn_cov,Q0,d_EM0)
+  # print("Third digit")
+  # print(EIR_min)
+  # # 3rd digit
+  # EIR_min <- find_EIR_boundary(step=0.01,EIR_min = EIR_min,
+  #                              r_EM0,em_loss,
+  #                              surv_bioassay,
+  #                              bites_Emanator,bites_Indoors,bites_Bed,
+  #                              em_cov,itn_cov,Q0,d_EM0)$EIR
+  # # 4th digit
+  # EIR_min <- find_EIR_boundary(step=0.001,EIR_min = EIR_min,
+  #                              r_EM0,em_loss,
+  #                              surv_bioassay,
+  #                              bites_Emanator,bites_Indoors,bites_Bed,
+  #                              em_cov,itn_cov,Q0,d_EM0)
   return(EIR_min$preprev)
 }
 
@@ -130,7 +130,9 @@ compare_elim <- function(EIR_min,EIR_max,r_EM0,em_loss,surv_bioassay,
                 surv_bioassay = surv_bioassay,Q0=Q0,d_EM0=d_EM0)
   min_elim <- elim(run_min)
   preprev <- run_min$prev[50]
-  plot(run_min$prev)
+  # plot(run_min$inc05*1000*(365/50),type="l")
+  # abline(h=1)
+  plot(run_min$allprev,type="l")
   abline(h=0.01)
   }
 
@@ -157,7 +159,17 @@ elim <- function(mod_run){
     # Checks for a period of 50 consecutive days when all-age prev is less than 0.0149%
     # if(all(mod_run$allprev[((365*5)+j):((365*5)+j+50)] < 0.000149)==TRUE){out<-TRUE}
     # Checks for a period of 50 consecutive days when prevalence in 0-5 year olds is less than 1%
-    if(all(mod_run$prev[((365*5)+j):((365*5)+j+50)] < 0.01)==TRUE){out<-TRUE}
+    if(all(mod_run$allprev[((365*5)+j):((365*5)+j+50)] < 0.01)==TRUE){out<-TRUE}
+    # Uses WHO definition of less than 1 case per 1000 people
+    # if(all(mod_run$inc05[((365*5)+j):((365*5)+j+50)]*1000*(365/50) < 1)){out<-TRUE}
   }
+  # for(j in 1:3184){
+  #   # Checks for a period of 50 consecutive days when all-age prev is less than 0.0149%
+  #   # if(all(mod_run$allprev[((365*5)+j):((365*5)+j+50)] < 0.000149)==TRUE){out<-TRUE}
+  #   # Checks for a period of 50 consecutive days when prevalence in 0-5 year olds is less than 1%
+  #   #if(all(mod_run$prev[((365*5)+j):((365*5)+j+50)] < 0.01)==TRUE){out<-TRUE}
+  #   # Uses WHO definition of less than 1 case per 1000 people
+  #   if(all(mod_run$inc05[((365*5)+j):((365*5)+j+100)]*1000*(365/50) < 1)){out<-TRUE}
+  # }
   return(out)
 }

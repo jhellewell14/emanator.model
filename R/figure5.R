@@ -41,19 +41,19 @@ figure5a <- function(){
 
  hi <- wes_palette(n=3,name="FantasticFox1")
 
- p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-  ggplot() + coord_cartesian(ylim=c(0,3.3)) +
-  geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
-  geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-  geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-  geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-  geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
-  scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-  scale_y_continuous(breaks=seq(0,3,0.5)) +
-  theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
-  theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
-  xlab("Resistance test (% survival)") +
-  ylab("EIR (bites per year)")
+ p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+   ggplot() + coord_cartesian(ylim=c(0,20)) +
+   geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
+   geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
+   geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+   geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+   geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
+   scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
+   scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+   theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
+   theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
+   xlab("Resistance test (% survival)") +
+   ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
  return(p)
 }
@@ -101,19 +101,19 @@ figure5b <- function(){
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,3,0.5)) +
-    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Resistance test (% survival)") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
@@ -161,19 +161,19 @@ figure5c <- function(){
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,3,0.5)) +
-    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Resistance test (% survival)") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
@@ -221,19 +221,19 @@ figure5d <- function(){
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3)) +
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,3,0.5)) +
-    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Resistance test (% survival)") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
@@ -281,19 +281,19 @@ figure5e <- function(){
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,3,0.5)) +
-    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Resistance test (% survival)") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }
@@ -341,19 +341,19 @@ figure5f <- function(){
 
   hi <- wes_palette(n=3,name="FantasticFox1")
 
-  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim,high=ITN_EM_elim) %>%
-    ggplot() + coord_cartesian(ylim=c(0,3.3)) +
+  p <- data.frame(x=seq(0,0.5,0.1),low=ITN_elim*100,high=ITN_EM_elim*100) %>%
+    ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=3.3,ymin=high),fill=hi[1]) +
-    geom_hline(yintercept=seq(0,3,0.5),lty=2,alpha=0.5) +
-    geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
+    geom_vline(xintercept=seq(0,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0,0.5,0.1),labels=paste(seq(0,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,3,0.5)) +
-    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18,axis_title_just = "centre") +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
+    theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Resistance test (% survival)") +
-    ylab("EIR (bites per year)")
+    ylab("Slide prevalence in 0-5 year olds pre-intervention")
 
   return(p)
 }

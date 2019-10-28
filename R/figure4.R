@@ -67,10 +67,10 @@ figure4a <- function(){
   yo <- wesanderson::wes_palette(name="IsleofDogs1",n=2)
 
   p <- data.frame(x=seq(0,0.4,0.05),outdoor_exp_low,outdoor_exp_high) %>% ggplot() +
-    geom_line(aes(x,outdoor_exp_low),size=1.2,col=yo[[1]]) +
-    geom_line(aes(x,outdoor_exp_high),size=1.2,col=yo[[2]]) +
-    geom_line(data=gamb_df,aes(x=x,y=gamb_out_low),size=1.2,alpha=0.4,col=yo[[1]],lty=2) +
-    geom_line(data=gamb_df,aes(x=x,y=gamb_out_high),size=1.2,alpha=0.4,col=yo[[2]],lty=2) +
+    geom_line(aes(x,outdoor_exp_low),size=1.2,col=yo[[1]],lty=2) +
+    geom_line(aes(x,outdoor_exp_high),size=1.2,col=yo[[2]],lty=2) +
+    geom_line(data=gamb_df,aes(x=x,y=gamb_out_low),size=1.2,col=yo[[1]]) +
+    geom_line(data=gamb_df,aes(x=x,y=gamb_out_high),size=1.2,col=yo[[2]]) +
     theme_bw() +
     scale_x_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
     scale_y_continuous(breaks=seq(0,1,0.1),labels=paste(seq(0,100,10),"%",sep="")) +
@@ -184,12 +184,15 @@ figure4c <- function(){
   }
 
   # Plot output
-  ca <- data.frame(z=as.vector(dm),y=rep(1:30,11),x=rep(seq(0,0.5,0.05),rep(30,11)))
-  p <- ca %>% dplyr::filter(x>=0.1) %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
-    scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+  ca <- data.frame(z=as.vector(dm[,-1]),y=rep(1:30,10),x=rep(seq(0.05,0.5,0.05),rep(30,10)))
+  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) +
+    ylab("Infectious bites per year pre-intervetion") +
+    xlab("Proportion of outdoor biting exposure pre-intervention") +
+    scale_x_continuous(breaks=seq(0.05,0.5,0.05),labels=paste(seq(5,50,5),"%",sep="")) +
     scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
-                       breaks=seq(0,180,30)) + theme_minimal() +
+                       breaks=seq(0,270,30),labels=seq(0,270,30),limits=c(0,270)) + theme_minimal() +
     theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
+  p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
   return(p)
 }
 
@@ -234,12 +237,15 @@ figure4d <- function(){
   }
 
   # Plot output
-  ca <- data.frame(z=as.vector(dm),y=rep(1:30,10),x=rep(seq(0.1,0.5,0.1),rep(30,5)))
-  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) + ylab("Infectious bites per year") + xlab("Percentage of bites happening outdoors") +
-    scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
+  ca <- data.frame(z=as.vector(dm[,-1]),y=rep(1:30,10),x=rep(seq(0.05,0.5,0.05),rep(30,10)))
+  p <- ca %>% ggplot() + geom_tile(aes(x,y,fill=z)) +
+    ylab("Infectious bites per year pre-intervetion") +
+    xlab("Proportion of outdoor biting exposure pre-intervention") +
+    scale_x_continuous(breaks=seq(0.05,0.5,0.05),labels=paste(seq(5,50,5),"%",sep="")) +
     scale_fill_viridis(name="Cases per 1000 \n0-5 year olds \naverted in first year",
-                       breaks=seq(0,180,30)) + theme_minimal() +
+                       breaks=seq(0,270,30)) + theme_minimal() +
     theme_ipsum_ps(axis_text_size = 16,axis_title_size = 18)
+  p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
   return(p)
 }
 
@@ -295,12 +301,12 @@ figure4e <- function(){
     ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-    geom_line(aes(x=x,y=opt),lty=2,fill=hi[2]) +
-    geom_hline(yintercept=seq(0,22,2),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_line(aes(x=x,y=opt),lty=2,col=hi[2],size=1.2) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
     geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,22,2),paste0(seq(0,22,2),"%")) +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
     theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Proportion of bites during the evening coverage gap") +
@@ -324,7 +330,7 @@ figure4f <- function(){
 
   ITN_elim <- c()
   ITN_EM_elim <- c()
-  ITM_optEM_elim <- c()
+  ITN_optEM_elim <- c()
   itn_cov <- 0.8
 
   for(i in 1:5){ #10% -> 50% outdoor biting exposure
@@ -360,12 +366,12 @@ figure4f <- function(){
     ggplot() + coord_cartesian(ylim=c(0,20)) +
     geom_ribbon(aes(x=x,ymin=0,ymax=low),fill=hi[3]) +
     geom_ribbon(aes(x=x,ymin=low,ymax=high),fill=hi[2]) +
-    geom_ribbon(aes(x=x,ymax=4,ymin=high),fill=hi[1]) +
-    geom_line(aes(x=x,y=opt),lty=2,fill=hi[2]) +
-    geom_hline(yintercept=seq(0,22,2),lty=2,alpha=0.5) +
+    geom_ribbon(aes(x=x,ymax=20,ymin=high),fill=hi[1]) +
+    geom_line(aes(x=x,y=opt),lty=2,col=hi[2],size=1.2) +
+    geom_hline(yintercept=seq(0,20,2),lty=2,alpha=0.5) +
     geom_vline(xintercept=seq(0.1,0.5,0.1),lty=2,alpha=0.5) +
     scale_x_continuous(breaks=seq(0.1,0.5,0.1),labels=paste(seq(10,50,10),"%",sep="")) +
-    scale_y_continuous(breaks=seq(0,22,2),paste0(seq(0,22,2),"%")) +
+    scale_y_continuous(breaks=seq(0,20,2),labels=paste0(seq(0,20,2),"%")) +
     theme_ipsum_ps(axis_text_size = 15,axis_title_size = 18) +
     theme(axis.text=element_text(size=15),axis.title=element_text(size=18)) +
     xlab("Proportion of bites during the evening coverage gap") +
