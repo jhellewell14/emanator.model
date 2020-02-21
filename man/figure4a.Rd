@@ -10,7 +10,7 @@ figure4a()
 plot
 }
 \description{
-This performs 9 model runs in total
+This performs 11 model runs in total
 }
 \author{
 Joel Hellewell

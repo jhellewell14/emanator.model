@@ -4,8 +4,20 @@
 \alias{find_EIR_boundary}
 \title{Finds the EIR boundary systematically for a given step size}
 \usage{
-find_EIR_boundary(step, EIR_min, r_EM0, em_loss, surv_bioassay,
-  bites_Emanator, bites_Indoors, bites_Bed, em_cov, itn_cov, Q0, d_EM0)
+find_EIR_boundary(
+  step,
+  EIR_min,
+  r_EM0,
+  em_loss,
+  surv_bioassay,
+  bites_Emanator,
+  bites_Indoors,
+  bites_Bed,
+  em_cov,
+  itn_cov,
+  Q0,
+  d_EM0
+)
 }
 \value{
 Minimum EIR value

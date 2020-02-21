@@ -1,6 +1,6 @@
 #' Plot Figure 4a
 #'
-#' This performs 9 model runs in total
+#' This performs 11 model runs in total
 #' @importFrom ggplot2 ggplot geom_line xlab ylab scale_x_continuous theme_bw scale_x_continuous scale_y_continuous geom_abline theme
 #' @importFrom wesanderson wes_palette
 #' @importFrom hrbrthemes theme_ipsum_ps
@@ -19,9 +19,9 @@ figure4a <- function(){
 
   # Model runs
 
-  for(i in 1:9){
-    print(paste("Run",k,"of 9"))
-    bites_Emanator <- seq(0,0.4,0.05)[i]
+  for(i in 1:11){
+    print(paste("Run",k,"of 11"))
+    bites_Emanator <- seq(0,0.5,0.05)[i]
     bites_Indoors <- 1 - bites_Emanator
     bites_Bed <- bites_Indoors*bed_to_indoors_ratio
     init_EIR <- 30
@@ -59,14 +59,14 @@ figure4a <- function(){
 
   # Output for gambiae-like mosquito
   gamb_df <- data.frame(
-    x = seq(0,0.4,0.05),
-    gamb_out_low = c(0.00000000,0.09174768,0.17582614,0.25186418,0.32233376,0.38625619,0.44475916,0.49877595,0.54799187),
-    gamb_out_high = c(0.0000000,0.1113744,0.2150535,0.3121984,0.4024373,0.4815407,0.5515633,0.6123888,0.6654937))
+    x = seq(0,0.5,0.05),
+    gamb_out_low = c(0.00000000,0.09174768,0.17582614,0.25186418,0.32233376,0.38625619,0.44475916,0.49877595,0.54799187,0.5932059, 0.6349499),
+    gamb_out_high = c(0.0000000,0.1113744,0.2150535,0.3121984,0.4024373,0.4815407,0.5515633,0.6123888,0.6654937,0.7111685, 0.7507864))
 
   # Plot output
   yo <- wesanderson::wes_palette(name="IsleofDogs1",n=2)
 
-  p <- data.frame(x=seq(0,0.4,0.05),outdoor_exp_low,outdoor_exp_high) %>% ggplot() +
+  p <- data.frame(x=seq(0,0.5,0.05),outdoor_exp_low,outdoor_exp_high) %>% ggplot() +
     geom_line(aes(x,outdoor_exp_low),size=1.2,col=yo[[1]],lty=2) +
     geom_line(aes(x,outdoor_exp_high),size=1.2,col=yo[[2]],lty=2) +
     geom_line(data=gamb_df,aes(x=x,y=gamb_out_low),size=1.2,col=yo[[1]]) +
